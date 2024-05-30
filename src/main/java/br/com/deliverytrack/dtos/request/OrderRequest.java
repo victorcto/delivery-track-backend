@@ -1,4 +1,4 @@
-package br.com.deliverytrack.dtos;
+package br.com.deliverytrack.dtos.request;
 
 import br.com.deliverytrack.enums.Status;
 import lombok.AllArgsConstructor;
@@ -12,24 +12,18 @@ import java.time.Instant;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderDTO {
-    private Long id;
-
-    private String trackingNumber;
-
-    private ParcelDTO parcel;
+public class OrderRequest {
+    private ParcelRequest parcel;
 
     private Status status;
-
-    private Instant orderDate;
 
     private Instant deliveryDate;
 
     private String address;
 
-    private CustomerDTO customer;
+    private Long customerId;
 
-    private DriverDTO driver;
+    private Long driverId;
 
     private Float price;
 }

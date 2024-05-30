@@ -1,4 +1,4 @@
-package br.com.deliverytrack.dtos;
+package br.com.deliverytrack.dtos.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class DriverDTO {
+public class DriverRequest {
     private String name;
 
     private String phone;

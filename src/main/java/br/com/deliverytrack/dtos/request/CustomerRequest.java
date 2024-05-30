@@ -1,4 +1,4 @@
-package br.com.deliverytrack.dtos;
+package br.com.deliverytrack.dtos.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,13 +9,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomerDTO {
-    private Long id;
-
+public class CustomerRequest {
     private String name;
 
     private String phone;
 
     private String email;
-
 }

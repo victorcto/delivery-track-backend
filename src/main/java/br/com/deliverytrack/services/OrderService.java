@@ -1,15 +1,23 @@
 package br.com.deliverytrack.services;
 
-import br.com.deliverytrack.domains.Dimension;
+import br.com.deliverytrack.domains.Customer;
+import br.com.deliverytrack.domains.Driver;
 import br.com.deliverytrack.domains.Order;
-import br.com.deliverytrack.dtos.OrderDTO;
+import br.com.deliverytrack.domains.Parcel;
+import br.com.deliverytrack.dtos.request.OrderRequest;
+import br.com.deliverytrack.dtos.response.OrderResponse;
 import br.com.deliverytrack.enums.Status;
+import br.com.deliverytrack.exceptions.BusinessRuleException;
+import br.com.deliverytrack.exceptions.DataValidationException;
+import br.com.deliverytrack.exceptions.InfraException;
+import br.com.deliverytrack.repositories.CustomerRepository;
+import br.com.deliverytrack.repositories.DriverRepository;
 import br.com.deliverytrack.repositories.OrderRepository;
-import br.com.deliverytrack.utils.MessageList;
 import br.com.deliverytrack.utils.ValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
@@ -17,69 +25,67 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
+    private final CustomerRepository customerRepository;
+    private final DriverRepository driverRepository;
+
     private final ModelMapper modelMapper;
 
     private final TrackingService trackingService;
+    private final ParcelService parcelService;
 
-    public OrderDTO save(OrderDTO orderDTO) {
-        orderDTO.setTrackingNumber(trackingService.generateUniqueTrackingNumber());
-        orderDTO.setOrderDate(Instant.now());
-        orderDTO.setStatus(Status.PENDING);
+    @Transactional
+    public OrderResponse save(OrderRequest orderRequest) {
+        Customer customer = customerRepository.findById(orderRequest.getCustomerId()).orElseThrow(
+                () -> new DataValidationException("Customer not found"));
+        Driver driver = driverRepository.findById(orderRequest.getDriverId()).orElseThrow(
+                () -> new DataValidationException("Driver not found"));
+        Parcel parcel = modelMapper.map(parcelService.save(orderRequest.getParcel()), Parcel.class);
 
-        Order order = modelMapper.map(orderDTO, Order.class);
+        orderRequest.setStatus(Status.PENDING);
+        orderRequest.setAddress(orderRequest.getAddress());
+        orderRequest.setPrice(orderRequest.getPrice());
 
-        validateOrder(order);
+        Order order = modelMapper.map(orderRequest, Order.class);
+        order.setTrackingNumber(trackingService.generateUniqueTrackingNumber());
+        order.setParcel(parcel);
+        order.setOrderDate(Instant.now());
+        order.setCustomer(customer);
+        order.setDriver(driver);
 
-        order = orderRepository.save(order);
-        return modelMapper.map(order, OrderDTO.class);
+        validate(order);
+        return modelMapper.map(orderRepository.save(order), OrderResponse.class);
     }
 
-    private void validateOrder(Order order) {
-        if (ValidatorUtil.isEmpty(order.getPrice())) {
-            throw new IllegalArgumentException("O preço não foi informaddo.");
+    private void validate(Order order) {
+        if (ValidatorUtil.isEmpty(order.getTrackingNumber())) {
+            throw new InfraException("Não foi possível gerar o número do pedido. " +
+                    "Por favor, entre em contato com o suporte");
+        }
+
+        if (ValidatorUtil.isEmpty(order.getParcel())) {
+            throw new BusinessRuleException("Os dados da encomenda não foram informados.");
         }
 
         if (ValidatorUtil.isEmpty(order.getAddress())) {
-            throw new IllegalArgumentException("O endereço nâo foi informado.");
+            throw new DataValidationException("O endereço nâo foi informado.");
         }
 
         if (ValidatorUtil.isEmpty(order.getCustomer())) {
-            throw new IllegalArgumentException("O cliente nâo foi informado.");
+            throw new DataValidationException("O cliente nâo foi informado ou não existe.");
         }
 
         if (ValidatorUtil.isEmpty(order.getDriver())) {
-            throw new IllegalArgumentException("O motorista nâo foi informado.");
+            throw new DataValidationException("O entregador nâo foi informado ou não existe.");
         }
 
-        if (ValidatorUtil.isEmpty(order.getParcel().getDescription())) {
-            throw new IllegalArgumentException("A descrição da encomenda não foi informada.");
+        if (order.getPrice() == null) {
+            throw new DataValidationException("O preço não foi informaddo.");
         }
 
-        MessageList dimensionErrors = validateDimensions(order.getParcel().getDimension());
-        if (ValidatorUtil.isNotEmpty(dimensionErrors)) {
-            throw new IllegalArgumentException(dimensionErrors.toString());
-        }
-    }
-
-    private MessageList validateDimensions(Dimension dimension) {
-        MessageList errors = new MessageList();
-        if (ValidatorUtil.isEmpty(dimension.getHeight())) {
-            errors.addMessage("A altura da encomenda não foi informada.");
+        if (order.getPrice() <= 0) {
+            throw new BusinessRuleException("O preço não pode ser igual ou menor do que zero.");
         }
 
-        if (ValidatorUtil.isEmpty(dimension.getWidth())) {
-            errors.addMessage("A largura da encomenda não foi informada.");
-        }
-
-        if (ValidatorUtil.isEmpty(dimension.getLength())) {
-            errors.addMessage("O comprimento da encomenda não foi informado.");
-        }
-
-        if (ValidatorUtil.isEmpty(dimension.getWeight())) {
-            errors.addMessage("O peso da encomenda não foi informado.");
-        }
-
-        return errors;
     }
 
 }

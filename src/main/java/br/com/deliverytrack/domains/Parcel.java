@@ -17,6 +17,11 @@ public class Parcel implements PersistDB {
     @Column(nullable = false)
     private String description;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    private Dimension dimension;
+    private Float width;
+
+    private Float height;
+
+    private Float length;
+
+    private Float weight;
 }

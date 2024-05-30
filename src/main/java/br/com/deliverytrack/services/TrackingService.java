@@ -22,8 +22,8 @@ public class TrackingService {
 
     private String generateTrackingNumber() {
         UUID uuid = UUID.randomUUID();
-        return "RR" + uuid.toString().substring(0, 8) + "-" + uuid.toString().substring(9, 13) + "-"
-                + uuid.toString().substring(14, 16);
+        return ("RR" + uuid.toString().substring(0, 8) + "-" + uuid.toString().substring(9, 13) + "-"
+                + uuid.toString().substring(14, 16)).toUpperCase();
     }
 
     private boolean isUniqueTrackingNumber(String trackingNumber) {

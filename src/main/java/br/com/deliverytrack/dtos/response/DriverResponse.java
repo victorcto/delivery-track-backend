@@ -1,4 +1,4 @@
-package br.com.deliverytrack.dtos;
+package br.com.deliverytrack.dtos.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,12 +9,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class DimensionDTO {
-    private Float width;
+public class DriverResponse {
+    private Long id;
 
-    private Float height;
+    private String name;
 
-    private Float length;
+    private String phone;
 
-    private Float weight;
+    private String email;
 }
