@@ -17,4 +17,6 @@ public class CustomerResponse {
     private String phone;
 
     private String email;
+
+    private Boolean favorite;
 }

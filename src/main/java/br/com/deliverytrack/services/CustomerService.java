@@ -48,6 +48,8 @@ public class CustomerService {
         if (ValidatorUtil.isNotValidPhone(customerRequest.getPhone())) {
             throw new DataValidationException("O telefone do cliente não é válido.");
         }
+
+        // TODO: validate email and phone uniqueness
     }
 
     public List<CustomerResponse> getAll() {
@@ -61,5 +63,10 @@ public class CustomerService {
                 () -> new NotFoundException("O cliente não foi encontrado."));
 
         return modelMapper.map(customer, CustomerResponse.class);
+    }
+
+    public List<CustomerResponse> getFavorites() {
+        List<Customer> favorites = customerRepository.findByFavorite(true);
+        return favorites.stream().map((c) -> modelMapper.map(c, CustomerResponse.class)).toList();
     }
 }

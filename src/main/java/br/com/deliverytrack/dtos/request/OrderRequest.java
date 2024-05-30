@@ -26,4 +26,6 @@ public class OrderRequest {
     private Long driverId;
 
     private Float price;
+
+    private Boolean delivered;
 }

@@ -32,4 +32,6 @@ public class OrderResponse {
     private DriverResponse driver;
 
     private Float price;
+
+    private Boolean delivered;
 }

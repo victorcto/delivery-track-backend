@@ -46,4 +46,7 @@ public class Order implements PersistDB {
     @Column(nullable = false)
     private Float price;
 
+    @Column(nullable = false)
+    private Boolean delivered;
+
 }

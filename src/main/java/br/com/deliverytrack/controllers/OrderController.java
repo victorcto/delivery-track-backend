@@ -1,5 +1,6 @@
 package br.com.deliverytrack.controllers;
 
+import br.com.deliverytrack.dtos.DeadlineControl;
 import br.com.deliverytrack.dtos.request.OrderRequest;
 import br.com.deliverytrack.dtos.response.OrderResponse;
 import br.com.deliverytrack.services.OrderService;
@@ -32,6 +33,16 @@ public class OrderController {
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.getById(id));
+    }
+
+    @GetMapping("/deadline-control")
+    public ResponseEntity<DeadlineControl> getDeadlineControl() {
+        return ResponseEntity.ok(orderService.getDeadlineControl());
+    }
+
+    @GetMapping("/latest")
+    public ResponseEntity<List<OrderResponse>> getLatestRegisteredOrders() {
+        return ResponseEntity.ok(orderService.getLatestRegisteredOrders());
     }
 
 }

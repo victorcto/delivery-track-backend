@@ -34,4 +34,9 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getById(id));
     }
 
+    @GetMapping("/favorites")
+    public ResponseEntity<List<CustomerResponse>> getFavorites() {
+        return ResponseEntity.ok(customerService.getFavorites());
+    }
+
 }

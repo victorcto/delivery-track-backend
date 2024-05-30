@@ -15,4 +15,6 @@ public class CustomerRequest {
     private String phone;
 
     private String email;
+
+    private Boolean favorite;
 }
