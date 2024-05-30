@@ -10,6 +10,7 @@ import br.com.deliverytrack.enums.Status;
 import br.com.deliverytrack.exceptions.BusinessRuleException;
 import br.com.deliverytrack.exceptions.DataValidationException;
 import br.com.deliverytrack.exceptions.InfraException;
+import br.com.deliverytrack.exceptions.NotFoundException;
 import br.com.deliverytrack.repositories.CustomerRepository;
 import br.com.deliverytrack.repositories.DriverRepository;
 import br.com.deliverytrack.repositories.OrderRepository;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -85,7 +88,19 @@ public class OrderService {
         if (order.getPrice() <= 0) {
             throw new BusinessRuleException("O preço não pode ser igual ou menor do que zero.");
         }
+    }
 
+    public List<OrderResponse> getAll() {
+        List<Order> orders = orderRepository.findAll();
+        return orders.stream().sorted(Comparator.comparing(Order::getOrderDate))
+                .map((o) -> modelMapper.map(o, OrderResponse.class)).toList();
+    }
+
+    public OrderResponse getById(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("O pedido de encomenda não foi encontrado."));
+
+        return modelMapper.map(order, OrderResponse.class);
     }
 
 }

@@ -4,12 +4,16 @@ import br.com.deliverytrack.domains.Customer;
 import br.com.deliverytrack.dtos.request.CustomerRequest;
 import br.com.deliverytrack.dtos.response.CustomerResponse;
 import br.com.deliverytrack.exceptions.DataValidationException;
+import br.com.deliverytrack.exceptions.NotFoundException;
 import br.com.deliverytrack.repositories.CustomerRepository;
 import br.com.deliverytrack.utils.ValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Comparator;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -44,5 +48,18 @@ public class CustomerService {
         if (ValidatorUtil.isNotValidPhone(customerRequest.getPhone())) {
             throw new DataValidationException("O telefone do cliente não é válido.");
         }
+    }
+
+    public List<CustomerResponse> getAll() {
+        List<Customer> customers = customerRepository.findAll();
+        return customers.stream().sorted(Comparator.comparing(Customer::getName))
+                .map((c) -> modelMapper.map(c, CustomerResponse.class)).toList();
+    }
+
+    public CustomerResponse getById(Long id) {
+        Customer customer = customerRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("O cliente não foi encontrado."));
+
+        return modelMapper.map(customer, CustomerResponse.class);
     }
 }
